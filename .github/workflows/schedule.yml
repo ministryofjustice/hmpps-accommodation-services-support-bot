@@ -14,7 +14,17 @@ on:
         type: 'choice'
         options:
           - assign
-          - skip
+          - add_non_working_days
+          - remove_non_working_days
+          - clear_non_working_days
+      user_id:
+        description: 'User ID (for non-working days actions)'
+        required: false
+        type: 'string'
+      dates:
+        description: 'Dates in YYYY-MM-DD format, comma-separated (for non-working days)'
+        required: false
+        type: 'string'
 
 jobs:
   assign-support:
@@ -36,7 +46,8 @@ jobs:
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SKIP_USER: ${{ github.event.inputs.skip_user || '' }}
+          USER_ID: ${{ github.event.inputs.user_id || '' }}
+          DATES: ${{ github.event.inputs.dates || '' }}
           ACTION: ${{ github.event.inputs.action || 'assign' }}
         run: node src/index.js
 

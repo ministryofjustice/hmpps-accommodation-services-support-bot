@@ -16,12 +16,11 @@ export async function postSupportAssignment(token, channel, engineers, customMes
   // Create the message
   const message = customMessage || `Good morning team! :sunny:`;
   const supportMessage = `${engineerMentions} are on application support for the next two days.`;
-  const skipInstructions = "If you can't take your shift, type `/support-skip` to be removed from the rotation.";
 
   try {
     await client.chat.postMessage({
       channel,
-      text: `${message}\n\n${supportMessage}\n\n${skipInstructions}`,
+      text: `${message}\n\n${supportMessage}`,
       blocks: [
         {
           type: "section",
@@ -35,13 +34,6 @@ export async function postSupportAssignment(token, channel, engineers, customMes
           text: {
             type: "mrkdwn",
             text: `:rotating_light: *Support Assignment* :rotating_light:\n${supportMessage}`
-          }
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: skipInstructions
           }
         },
         {

@@ -22,7 +22,8 @@ export function loadRotationData(filePath) {
         currentEngineers: [],
         skipList: [],
         history: [],
-        lastRotationDate: null
+        lastRotationDate: null,
+        nonWorkingDays: {}
       };
 
       // Save default data
@@ -42,7 +43,8 @@ export function loadRotationData(filePath) {
       currentEngineers: [],
       skipList: [],
       history: [],
-      lastRotationDate: null
+      lastRotationDate: null,
+      nonWorkingDays: {}
     };
   }
 }

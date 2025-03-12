@@ -3,5 +3,6 @@
   "currentEngineers": [],
   "skipList": [],
   "history": [],
-  "lastRotationDate": null
+  "lastRotationDate": null,
+  "nonWorkingDays": {}
 }

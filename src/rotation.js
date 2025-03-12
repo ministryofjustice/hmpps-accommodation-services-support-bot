@@ -96,26 +96,6 @@ export function updateRotation(rotationData, newEngineers) {
 }
 
 /**
- * Skip a user's turn in the rotation
- * @param {Object} rotationData - Current rotation data
- * @param {string} userId - User ID to skip
- * @returns {Object} Updated rotation data
- */
-export function skipUser(rotationData, userId) {
-  // Initialize skip list if it doesn't exist
-  if (!rotationData.skipList) {
-    rotationData.skipList = [];
-  }
-
-  // Add user to skip list if not already there
-  if (!rotationData.skipList.includes(userId)) {
-    rotationData.skipList.push(userId);
-  }
-
-  return rotationData;
-}
-
-/**
  * Helper function to shuffle an array in-place using Fisher-Yates algorithm
  * @param {Array} array - Array to shuffle
  */
