@@ -40,6 +40,12 @@
       "recurringDays": [
         "friday"
       ]
+    },
+    "U067C4YGUUF": {
+      "specificDates": [],
+      "recurringDays": [
+        "friday"
+      ]
     }
   }
 }
