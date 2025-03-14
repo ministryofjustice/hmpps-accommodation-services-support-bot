@@ -42,9 +42,16 @@
         "U07J2S05CJ3",
         "U06EQC7PW73"
       ]
+    },
+    {
+      "date": "2025-03-14T12:57:03.978Z",
+      "engineers": [
+        "U07J2S05CJ3",
+        "U06EQC7PW73"
+      ]
     }
   ],
-  "lastRotationDate": "2025-03-14T12:56:00.167Z",
+  "lastRotationDate": "2025-03-14T12:57:03.978Z",
   "nonWorkingDays": {
     "U072M22CGRK": {
       "specificDates": [],
