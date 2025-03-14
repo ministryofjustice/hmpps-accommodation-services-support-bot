@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 const CONFIG = {
   slackToken: process.env.SLACK_TOKEN,
   channelId: 'cas-dev-away-days', // The channel to post to
-  userGroupId: 'cas-developers', // The user group to pull engineers from
+  userGroupId: 'cas1-devs', // The user group to pull engineers from
   daysPerRotation: 0, // Number of days each rotation lasts
   engineersPerShift: 2 // Number of engineers on support at once
 };
