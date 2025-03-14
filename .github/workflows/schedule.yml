@@ -17,12 +17,15 @@ on:
           - add_non_working_days
           - remove_non_working_days
           - clear_non_working_days
+          - add_recurring_days
+          - remove_recurring_days
+          - clear_recurring_days
       user_id:
         description: 'User ID (for non-working days actions)'
         required: false
         type: 'string'
-      dates:
-        description: 'Dates in YYYY-MM-DD format, comma-separated (for non-working days)'
+      days:
+        description: 'Dates (YYYY-MM-DD) or days (e.g., Friday), comma-separated'
         required: false
         type: 'string'
 
@@ -47,7 +50,7 @@ jobs:
           SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USER_ID: ${{ github.event.inputs.user_id || '' }}
-          DATES: ${{ github.event.inputs.dates || '' }}
+          DAYS: ${{ github.event.inputs.days || '' }}
           ACTION: ${{ github.event.inputs.action || 'assign' }}
         run: node src/index.js
 

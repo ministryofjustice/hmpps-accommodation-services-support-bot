@@ -6,8 +6,9 @@ import { WebClient } from '@slack/web-api';
  * @param {string} channel - Channel to post to (without the #)
  * @param {string[]} engineers - Array of engineer user IDs
  * @param {string} customMessage - Optional custom message
+ * @param {number} daysPerRotation - Number of days per rotation
  */
-export async function postSupportAssignment(token, channel, engineers, customMessage = null) {
+export async function postSupportAssignment(token, channel, engineers, customMessage = null, daysPerRotation = 2) {
   const client = new WebClient(token);
 
   // Format the engineers as user mentions
@@ -15,7 +16,7 @@ export async function postSupportAssignment(token, channel, engineers, customMes
 
   // Create the message
   const message = customMessage || `Good morning team! :sunny:`;
-  const supportMessage = `${engineerMentions} are on application support for the next two days.`;
+  const supportMessage = `${engineerMentions} are on application support for the next ${daysPerRotation} working days.`;
 
   try {
     await client.chat.postMessage({

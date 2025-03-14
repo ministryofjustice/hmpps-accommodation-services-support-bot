@@ -5,10 +5,52 @@
 ## Description
 
 This repo contains code for a slack app support bot, to help assign a person on application support for the Community Accommodation Services (CAS) team.
+The bot uses Github Actions to select a member of the cas-dev team to assign them to application support.
 This is currently a proof of concept project, and may not go anywhere (12/03/2025)
 
 
-TODO - follow this when established beyond it being a 30 min proof of concept
+## Using the Bot
+### Setting Up Non-Working Days
+You can still set specific non-working days for team members:
+
+Go to your GitHub repository's Actions tab
+Select "Support Rotation Schedule" workflow
+Click "Run workflow"
+Select the appropriate action:
+
+add_non_working_days: For specific dates (e.g., holidays)
+add_recurring_days: For recurring days (e.g., every Friday)
+
+
+Enter the engineer's Slack user ID
+Enter the days to add (dates or day names)
+Click "Run workflow"
+
+### Examples
+
+Add every Friday as non-working day for user U123ABC:
+
+Action: add_recurring_days
+User ID: U123ABC
+Days: Friday
+
+
+Add specific holiday dates:
+
+Action: add_non_working_days
+User ID: U123ABC
+Days: 2025-12-25,2025-12-26 (Christmas and Boxing Day)
+
+
+
+How It Works
+
+Support rotation looks for engineers who are available for the full rotation period
+Support is assigned for a period of 2 working days by default
+Weekends are automatically skipped in the rotation schedule
+The system checks for Slack status (out of office, illness) and configured non-working days
+Support assignments are not made or changed on weekends
+
 
 ### Update README
 
