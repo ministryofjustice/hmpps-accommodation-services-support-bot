@@ -17,11 +17,18 @@ export function getNextEngineers(rotationData, availableEngineers, count) {
     !rotationData.skipList.includes(id) && availableEngineers.includes(id)
   );
 
-  // Handle case where we don't have enough eligible engineers
+  // Safety check: If there are no eligible engineers at all,
+  // we need to use whoever is available, even if they're in the skip list
+  if (eligibleEngineers.length === 0) {
+    console.log('No eligible engineers available. Using all available engineers.');
+    return availableEngineers.slice(0, count);
+  }
+
+  // Handle case where we don't have enough eligible engineers but some are available
   if (eligibleEngineers.length < count) {
-    // Reset skip list and try again, but preserve the order
-    rotationData.skipList = [];
-    return getNextEngineers(rotationData, availableEngineers, count);
+    console.log(`Only ${eligibleEngineers.length} eligible engineers available, but ${count} needed.`);
+    // Use all eligible engineers and don't try to recursively call
+    return eligibleEngineers;
   }
 
   // Select the next engineers in the rotation
@@ -38,24 +45,28 @@ export function getNextEngineers(rotationData, availableEngineers, count) {
   }
 
   // Select the required number of engineers
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count && i < eligibleEngineers.length; i++) {
     selectedEngineers.push(eligibleEngineers[index]);
     index = (index + 1) % eligibleEngineers.length;
 
     // If we loop back to the start, break to avoid duplicates
-    if (index === 0 && i < count - 1) {
+    if (index === 0 && i < count - 1 && i < eligibleEngineers.length - 1) {
       break;
     }
   }
 
-  // If we couldn't get enough engineers, fill from the available pool
-  while (selectedEngineers.length < count) {
+  // If we still don't have enough engineers, add more from the available pool
+  // but avoid duplicates
+  if (selectedEngineers.length < count) {
     const remainingEngineers = availableEngineers.filter(id =>
-      !selectedEngineers.includes(id) && !rotationData.currentEngineers.includes(id)
+      !selectedEngineers.includes(id)
     );
 
-    if (remainingEngineers.length === 0) break;
-    selectedEngineers.push(remainingEngineers[0]);
+    let i = 0;
+    while (selectedEngineers.length < count && i < remainingEngineers.length) {
+      selectedEngineers.push(remainingEngineers[i]);
+      i++;
+    }
   }
 
   return selectedEngineers;
