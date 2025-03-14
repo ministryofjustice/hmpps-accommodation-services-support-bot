@@ -34,6 +34,12 @@
       "recurringDays": [
         "friday"
       ]
+    },
+    "U06HLPVDCSW": {
+      "specificDates": [],
+      "recurringDays": [
+        "friday"
+      ]
     }
   }
 }
