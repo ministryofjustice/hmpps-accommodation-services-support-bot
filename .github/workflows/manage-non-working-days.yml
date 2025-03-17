@@ -48,6 +48,10 @@ jobs:
           USER_ID: ${{ github.event.inputs.user_id }}
           DAYS: ${{ github.event.inputs.days || '' }}
           ACTION: ${{ github.event.inputs.action }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_USERGROUP_ID: ${{ secrets.SLACK_USERGROUP_ID }}
+          DAYS_PER_ROTATION: ${{ secrets.DAYS_PER_ROTATION || '2' }}
+          ENGINEERS_PER_SHIFT: ${{ secrets.ENGINEERS_PER_SHIFT || '2' }}
         run: node src/manage-non-working-days.js
 
       - name: Commit updated rotation data

@@ -37,6 +37,10 @@ jobs:
           SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTION: ${{ github.event.inputs.action || 'assign' }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_USERGROUP_ID: ${{ secrets.SLACK_USERGROUP_ID }}
+          DAYS_PER_ROTATION: ${{ secrets.DAYS_PER_ROTATION || '2' }}
+          ENGINEERS_PER_SHIFT: ${{ secrets.ENGINEERS_PER_SHIFT || '2' }}
         run: node src/index.js
 
       - name: Commit updated rotation data

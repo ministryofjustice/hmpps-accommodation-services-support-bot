@@ -11,10 +11,10 @@ const __dirname = dirname(__filename);
 // Configuration
 const CONFIG = {
   slackToken: process.env.SLACK_TOKEN,
-  channelId: 'cas-dev', // The channel to post to
-  userGroupId: 'cas-engineers', // The user group to pull engineers from
-  daysPerRotation: 2, // Number of days each rotation lasts
-  engineersPerShift: 2 // Number of engineers on support at once
+  channelId: process.env.SLACK_CHANNEL_ID || 'cas-dev', // The channel to post to
+  userGroupId: process.env.SLACK_USERGROUP_ID || 'cas-engineers', // The user group to pull engineers from
+  daysPerRotation: parseInt(process.env.DAYS_PER_ROTATION || '2', 10), // Number of days each rotation lasts
+  engineersPerShift: parseInt(process.env.ENGINEERS_PER_SHIFT || '2', 10) // Number of engineers on support at once
 };
 
 async function main() {
