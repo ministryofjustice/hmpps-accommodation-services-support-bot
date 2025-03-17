@@ -1,19 +1,15 @@
-name: Support Rotation Schedule
+name: Manage Non-Working Days
 
 on:
-  schedule:
-    # Run at 8:30 AM every day
-    - cron: '30 8 * * *'
   workflow_dispatch:
-    # Allow manual triggering
+    # Allow manual triggering only
     inputs:
       action:
         description: 'Action to perform'
         required: true
-        default: 'assign'
+        default: 'add_non_working_days'
         type: 'choice'
         options:
-          - assign
           - add_non_working_days
           - remove_non_working_days
           - clear_non_working_days
@@ -21,8 +17,8 @@ on:
           - remove_recurring_days
           - clear_recurring_days
       user_id:
-        description: 'User ID (for non-working days actions)'
-        required: false
+        description: 'Slack User ID'
+        required: true
         type: 'string'
       days:
         description: 'Dates (YYYY-MM-DD) or days (e.g., Friday), comma-separated'
@@ -30,7 +26,7 @@ on:
         type: 'string'
 
 jobs:
-  assign-support:
+  manage-non-working-days:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,14 +41,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run support rotation
+      - name: Manage non-working days
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USER_ID: ${{ github.event.inputs.user_id || '' }}
+          USER_ID: ${{ github.event.inputs.user_id }}
           DAYS: ${{ github.event.inputs.days || '' }}
-          ACTION: ${{ github.event.inputs.action || 'assign' }}
-        run: node src/index.js
+          ACTION: ${{ github.event.inputs.action }}
+        run: node src/manage-non-working-days.js
 
       - name: Commit updated rotation data
         if: success()
@@ -60,5 +56,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add data/rotation.json
-          git commit -m "Update rotation data [skip ci]" || echo "No changes to commit"
+          git commit -m "Update non-working days [skip ci]" || echo "No changes to commit"
           git push

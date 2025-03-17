@@ -1,7 +1,7 @@
 import { getNextEngineers, updateRotation } from './rotation.js';
 import { postSupportAssignment, getUserStatuses, getUserGroupMembers } from './slack.js';
 import { loadRotationData, saveRotationData } from './storage.js';
-import { getAvailableEngineers, addNonWorkingDays, removeNonWorkingDays, clearNonWorkingDays, isNonWorkingDay } from './nonWorkingDays.js';
+import { getAvailableEngineers, isNonWorkingDay } from './nonWorkingDays.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -11,9 +11,9 @@ const __dirname = dirname(__filename);
 // Configuration
 const CONFIG = {
   slackToken: process.env.SLACK_TOKEN,
-  channelId: 'cas-dev-away-days', // The channel to post to
-  userGroupId: 'cas1-devs', // The user group to pull engineers from
-  daysPerRotation: 0, // Number of days each rotation lasts
+  channelId: 'cas-dev', // The channel to post to
+  userGroupId: 'cas-developers', // The user group to pull engineers from
+  daysPerRotation: 2, // Number of days each rotation lasts
   engineersPerShift: 2 // Number of engineers on support at once
 };
 
@@ -24,176 +24,100 @@ async function main() {
       throw new Error('SLACK_TOKEN is required');
     }
 
-    // Determine what action to take based on environment variables
+    // Determine what action to take
     const action = process.env.ACTION || 'assign';
-    const userId = process.env.USER_ID || '';
-    const daysInput = process.env.DAYS || '';
-
-    // Parse days input for actions
-    const days = daysInput ? daysInput.split(',').map(d => d.trim()) : [];
 
     // Load current rotation data
     const dataPath = join(dirname(__dirname), 'data', 'rotation.json');
     const rotationData = loadRotationData(dataPath);
 
-    // Handle different actions
-    if (action === 'add_non_working_days' && userId && days.length > 0) {
-      // Add non-working days for a user
-      const updatedData = addNonWorkingDays(rotationData, userId, days);
-      saveRotationData(dataPath, updatedData);
-      console.log(`Added non-working days for user ${userId}: ${days.join(', ')}`);
+    const today = new Date();
 
-      // Reassign if the affected user is on current duty and one of the dates is today or tomorrow
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
+    // Get all members of the engineering group
+    const engineers = await getUserGroupMembers(CONFIG.slackToken, CONFIG.userGroupId);
 
-      if (rotationData.currentEngineers.includes(userId) &&
-        (isNonWorkingDay(updatedData, userId, today) || isNonWorkingDay(updatedData, userId, tomorrow))) {
-        // Get all members of the engineering group
-        const engineers = await getUserGroupMembers(CONFIG.slackToken, CONFIG.userGroupId);
+    // Get user statuses to check for out-of-office or illness
+    const userStatuses = await getUserStatuses(CONFIG.slackToken, engineers);
 
-        // Get user statuses to check for out-of-office or illness
-        const userStatuses = await getUserStatuses(CONFIG.slackToken, engineers);
+    // Filter out engineers who are out of office or ill
+    const statusFilteredEngineers = engineers.filter(userId => {
+      const status = userStatuses[userId];
+      if (!status) return true;
 
-        // Filter out engineers who are out of office or ill
-        const statusFilteredEngineers = engineers.filter(userId => {
-          const status = userStatuses[userId];
-          if (!status) return true;
+      const statusText = status.statusText.toLowerCase();
+      const isOOO = statusText.includes('ooo') ||
+        statusText.includes('out of office') ||
+        statusText.includes('vacation') ||
+        statusText.includes('holiday') ||
+        statusText.includes('sick') ||
+        statusText.includes('ill');
 
-          const statusText = status.statusText.toLowerCase();
-          const isOOO = statusText.includes('ooo') ||
-            statusText.includes('out of office') ||
-            statusText.includes('vacation') ||
-            statusText.includes('holiday') ||
-            statusText.includes('sick') ||
-            statusText.includes('ill');
+      return !isOOO;
+    });
 
-          return !isOOO;
-        });
+    // Calculate date range for this rotation
+    // We need to find a date range that contains CONFIG.daysPerRotation weekdays
+    const endDate = new Date(today);
+    let weekdaysCount = 0;
 
-        // Calculate date range for this rotation
-        // We need to find a date range that contains CONFIG.daysPerRotation weekdays
-        const endDate = new Date(today);
-        let weekdaysCount = 0;
+    while (weekdaysCount < CONFIG.daysPerRotation) {
+      endDate.setDate(endDate.getDate() + 1);
+      const dayOfWeek = endDate.getDay();
+      // Only count weekdays (Monday to Friday)
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        weekdaysCount++;
+      }
+    }
 
-        while (weekdaysCount < CONFIG.daysPerRotation) {
-          endDate.setDate(endDate.getDate() + 1);
-          const dayOfWeek = endDate.getDay();
-          // Only count weekdays (Monday to Friday)
-          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-            weekdaysCount++;
-          }
+    // Further filter by non-working days
+    const availableEngineers = getAvailableEngineers(
+      rotationData,
+      statusFilteredEngineers,
+      today,
+      endDate
+    );
+
+    if (action === 'force_reassign') {
+      console.log('Forcing support reassignment.');
+
+      // Try to get different engineers than currently assigned
+      let nextEngineers;
+      let attempts = 0;
+      const maxAttempts = 5;
+
+      do {
+        // Get next engineers
+        nextEngineers = getNextEngineers(rotationData, availableEngineers, CONFIG.engineersPerShift);
+
+        // Shuffle the rotation order to get different engineers on next attempt
+        if (availableEngineers.length > CONFIG.engineersPerShift) {
+          shuffleArray(rotationData.rotationOrder);
         }
 
-        // Further filter by non-working days
-        const availableEngineers = getAvailableEngineers(
-          updatedData,
-          statusFilteredEngineers,
-          today,
-          endDate
-        );
-
-        const newEngineers = getNextEngineers(updatedData, availableEngineers, CONFIG.engineersPerShift);
-        await postSupportAssignment(
-          CONFIG.slackToken,
-          CONFIG.channelId,
-          newEngineers,
-          'Reassigning support due to non-working days update.',
-          CONFIG.daysPerRotation
-        );
-
-        // Update rotation data
-        const finalData = updateRotation(updatedData, newEngineers);
-        saveRotationData(dataPath, finalData);
-      }
-    } else if (action === 'add_recurring_days' && userId && days.length > 0) {
-      // This is just for clarity in command usage - internally it uses the same function
-      const updatedData = addNonWorkingDays(rotationData, userId, days);
-      saveRotationData(dataPath, updatedData);
-      console.log(`Added recurring non-working days for user ${userId}: ${days.join(', ')}`);
-
-      // Same reassignment logic as add_non_working_days
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-
-      if (rotationData.currentEngineers.includes(userId) &&
-        (isNonWorkingDay(updatedData, userId, today) || isNonWorkingDay(updatedData, userId, tomorrow))) {
-        // Similar logic as above - get engineers, filter, and reassign
-        const engineers = await getUserGroupMembers(CONFIG.slackToken, CONFIG.userGroupId);
-        const userStatuses = await getUserStatuses(CONFIG.slackToken, engineers);
-        const statusFilteredEngineers = engineers.filter(userId => {
-          const status = userStatuses[userId];
-          if (!status) return true;
-
-          const statusText = status.statusText.toLowerCase();
-          const isOOO = statusText.includes('ooo') ||
-            statusText.includes('out of office') ||
-            statusText.includes('vacation') ||
-            statusText.includes('holiday') ||
-            statusText.includes('sick') ||
-            statusText.includes('ill');
-
-          return !isOOO;
-        });
-
-        // Calculate date range for this rotation
-        // We need to find a date range that contains CONFIG.daysPerRotation weekdays
-        const endDate = new Date(today);
-        let weekdaysCount = 0;
-
-        while (weekdaysCount < CONFIG.daysPerRotation) {
-          endDate.setDate(endDate.getDate() + 1);
-          const dayOfWeek = endDate.getDay();
-          // Only count weekdays (Monday to Friday)
-          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-            weekdaysCount++;
-          }
+        attempts++;
+        // Break if we've tried several times or have limited engineers
+        if (attempts >= maxAttempts || availableEngineers.length <= CONFIG.engineersPerShift) {
+          break;
         }
+      } while (arraysHaveSameElements(nextEngineers, rotationData.currentEngineers));
 
-        const availableEngineers = getAvailableEngineers(
-          updatedData,
-          statusFilteredEngineers,
-          today,
-          endDate
-        );
+      // Post to Slack
+      await postSupportAssignment(
+        CONFIG.slackToken,
+        CONFIG.channelId,
+        nextEngineers,
+        'Support duty has been reassigned.',
+        CONFIG.daysPerRotation
+      );
 
-        const newEngineers = getNextEngineers(updatedData, availableEngineers, CONFIG.engineersPerShift);
-        await postSupportAssignment(
-          CONFIG.slackToken,
-          CONFIG.channelId,
-          newEngineers,
-          'Reassigning support due to recurring non-working days update.',
-          CONFIG.daysPerRotation
-        );
+      // Update rotation data
+      const updatedData = updateRotation(rotationData, nextEngineers);
+      saveRotationData(dataPath, updatedData);
 
-        const finalData = updateRotation(updatedData, newEngineers);
-        saveRotationData(dataPath, finalData);
-      }
-    } else if (action === 'remove_non_working_days' && userId && days.length > 0) {
-      // Remove non-working days for a user
-      const updatedData = removeNonWorkingDays(rotationData, userId, days);
-      saveRotationData(dataPath, updatedData);
-      console.log(`Removed non-working days for user ${userId}: ${days.join(', ')}`);
-    } else if (action === 'remove_recurring_days' && userId && days.length > 0) {
-      // This is just for clarity in command usage - internally it uses the same function
-      const updatedData = removeNonWorkingDays(rotationData, userId, days);
-      saveRotationData(dataPath, updatedData);
-      console.log(`Removed recurring non-working days for user ${userId}: ${days.join(', ')}`);
-    } else if (action === 'clear_non_working_days' && userId) {
-      // Clear all non-working days for a user
-      const updatedData = clearNonWorkingDays(rotationData, userId);
-      saveRotationData(dataPath, updatedData);
-      console.log(`Cleared all non-working days for user ${userId}`);
-    } else if (action === 'clear_recurring_days' && userId) {
-      // Clear only recurring days
-      const updatedData = clearNonWorkingDays(rotationData, userId, 'recurring');
-      saveRotationData(dataPath, updatedData);
-      console.log(`Cleared recurring non-working days for user ${userId}`);
+      console.log(`Support reassigned to: ${nextEngineers.join(', ')}`);
     } else {
-      // Check if it's time for a new rotation (every other day)
-      const today = new Date();
+      // Regular assignment logic
+      // Check if it's time for a new rotation (every other working day)
       const lastRotationDate = rotationData.lastRotationDate ? new Date(rotationData.lastRotationDate) : null;
 
       // Calculate days since last rotation (excluding weekends)
@@ -225,50 +149,6 @@ async function main() {
           return;
         }
 
-        // Get all members of the engineering group
-        const engineers = await getUserGroupMembers(CONFIG.slackToken, CONFIG.userGroupId);
-
-        // Get user statuses to check for out-of-office or illness
-        const userStatuses = await getUserStatuses(CONFIG.slackToken, engineers);
-
-        // Filter out engineers who are out of office or ill
-        const statusFilteredEngineers = engineers.filter(userId => {
-          const status = userStatuses[userId];
-          if (!status) return true;
-
-          const statusText = status.statusText.toLowerCase();
-          const isOOO = statusText.includes('ooo') ||
-            statusText.includes('out of office') ||
-            statusText.includes('vacation') ||
-            statusText.includes('holiday') ||
-            statusText.includes('sick') ||
-            statusText.includes('ill');
-
-          return !isOOO;
-        });
-
-        // Calculate date range for this rotation
-        // We need to find a date range that contains CONFIG.daysPerRotation weekdays
-        const endDate = new Date(today);
-        let weekdaysCount = 0;
-
-        while (weekdaysCount < CONFIG.daysPerRotation) {
-          endDate.setDate(endDate.getDate() + 1);
-          const dayOfWeek = endDate.getDay();
-          // Only count weekdays (Monday to Friday)
-          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-            weekdaysCount++;
-          }
-        }
-
-        // Further filter by non-working days
-        const availableEngineers = getAvailableEngineers(
-          rotationData,
-          statusFilteredEngineers,
-          today,
-          endDate
-        );
-
         // Get next engineers
         const nextEngineers = getNextEngineers(rotationData, availableEngineers, CONFIG.engineersPerShift);
 
@@ -296,6 +176,33 @@ async function main() {
     console.error('Error in support rotation:', error);
     process.exit(1);
   }
+}
+
+/**
+ * Helper function to check if arrays have the same elements (regardless of order)
+ * @param {Array} arr1 - First array
+ * @param {Array} arr2 - Second array
+ * @returns {boolean} True if arrays have the same elements
+ */
+function arraysHaveSameElements(arr1, arr2) {
+  if (!arr1 || !arr2) return false;
+  if (arr1.length !== arr2.length) return false;
+
+  const set1 = new Set(arr1);
+  return arr2.every(item => set1.has(item));
+}
+
+/**
+ * Helper function to shuffle an array
+ * @param {Array} array - Array to shuffle
+ * @returns {Array} Shuffled array
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 main();
