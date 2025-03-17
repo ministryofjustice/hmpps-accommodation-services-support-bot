@@ -9,8 +9,23 @@ This repo contains code for a slack app support bot, to help assign a person on 
 The bot uses Github Actions to select a member of the cas-dev team to assign them to application support.
 This is currently a proof of concept project, and may not go anywhere (12/03/2025)
 
+## How It Works
+
+Support rotation looks for engineers who are available for the full rotation period
+Support is assigned for a period of 2 working days by default
+Weekends are automatically skipped in the rotation schedule
+The system checks for Slack status (out of office, illness) and configured non-working days
+Support assignments are not made or changed on weekends
 
 ## Using the Bot
+
+### Manually reassigning
+The bot should automatically run every two days and assign three new people to support. 
+If it needs to be manually run again, to re-assign - use the [support rotatation schedule workflow](https://github.com/ministryofjustice/hmpps-community-accommodation-services-support-bot/actions/workflows/support-rotation.yml).
+
+Select "force re-assign"
+Click "Run workflow"
+
 ### Setting Up Non-Working Days
 You set repeating non working days of the week OR specific dates where you are unavailable to work using the ['manage non working days' action](https://github.com/ministryofjustice/hmpps-community-accommodation-services-support-bot/actions/workflows/manage-non-working-days.yml).
 
@@ -47,13 +62,7 @@ Days: 2025-12-25,2025-12-26 (Christmas and Boxing Day)
 
 
 
-How It Works
 
-Support rotation looks for engineers who are available for the full rotation period
-Support is assigned for a period of 2 working days by default
-Weekends are automatically skipped in the rotation schedule
-The system checks for Slack status (out of office, illness) and configured non-working days
-Support assignments are not made or changed on weekends
 
 
 [TODO - keeping all this below here as I havne't looked at it yet]
