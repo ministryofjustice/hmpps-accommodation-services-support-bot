@@ -52,7 +52,7 @@ jobs:
           SLACK_USERGROUP_ID: ${{ secrets.SLACK_USERGROUP_ID }}
           DAYS_PER_ROTATION: ${{ secrets.DAYS_PER_ROTATION || '2' }}
           ENGINEERS_PER_SHIFT: ${{ secrets.ENGINEERS_PER_SHIFT || '2' }}
-        run: node src/manage-non-working-days.js
+        run: node src/manageAvailability.js
 
       - name: Commit updated rotation data
         if: success()
