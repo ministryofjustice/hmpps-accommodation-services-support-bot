@@ -15,11 +15,10 @@ export async function postSupportAssignment(token, channel, engineers, customMes
   const engineerMentions = engineers.map(id => `<@${id}>`).join(' and ');
 
   // Create the message
-  const message = customMessage || `Good morning team! :sunny:`;
-  const supportMessage = `${engineerMentions} are on application support for the next ${daysPerRotation} working days. During this time please keep an eye on the #cas-events channel and monitor any alerts that appear there. 
-  if you are unable to immidiaately put in a fix for the alert, please document it in some way - either by creating a ticket in JIRA and/or commenting on the alert.\n
-  [See support documentation for guidance](https://dsdmoj.atlassian.net/wiki/spaces/AP/pages/5006426252/CAS+Technical+Support).\n
-  To add in your non-working days, [please use the action on the support bot here](https://github.com/ministryofjustice/hmpps-community-accommodation-services-support-bot/actions/workflows/manage-non-working-days.yml)`;
+  const message = customMessage || `:sunny: Good morning team! :sunny:`;
+  const supportMessage = `${engineerMentions} are on application support for the next ${daysPerRotation} working days. During this time please keep an eye on the #cas-events channel and monitor any alerts that appear there.\n\nIf you are unable to immediately put in a fix for the alert, please document it in some way - either by creating a ticket in JIRA and/or commenting on the alert.\n
+  \n<https://dsdmoj.atlassian.net/wiki/spaces/AP/pages/5006426252/CAS+Technical+Support|See support documentation for guidance>.\n
+  \nTo add in your non-working days, <https://github.com/ministryofjustice/hmpps-community-accommodation-services-support-bot/actions/workflows/manage-non-working-days.yml|please use the action on the support bot here>.`;
 
   try {
     await client.chat.postMessage({
@@ -37,7 +36,7 @@ export async function postSupportAssignment(token, channel, engineers, customMes
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `:yay-frog: *Support Assignment* :yay-frog:\n${supportMessage}`
+            text: `:sunflower: *Support Assignment* :sunflower:\n${supportMessage}`
           }
         },
         {
