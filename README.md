@@ -65,31 +65,7 @@ Days: 2025-12-25,2025-12-26 (Christmas and Boxing Day)
 
 
 
-[TODO - keeping all this below here as I havne't looked at it yet]
-### Read about the GitHub repository standards
-
-Familiarise yourself with the Ministry of Justice GitHub Repository Standards. These standards ensure consistency, maintainability, and best practices across all our repositories.
-
-You can find the standards [here](https://user-guide.operations-engineering.service.justice.gov.uk/documentation/information/mojrepostandards.html).
-
-Please read and understand these standards thoroughly and enable them when you feel comfortable.
-
-### Modify the GitHub Standards Badge
-
-Once you've ensured that all the [GitHub Repository Standards](https://user-guide.operations-engineering.service.justice.gov.uk/documentation/information/mojrepostandards.html) have been applied to your repository, it's time to update the Ministry of Justice (MoJ) Compliance Badge located in the README file.
-
-The badge demonstrates that your repository is compliant with MoJ's standards. Please follow these [instructions](https://user-guide.operations-engineering.service.justice.gov.uk/documentation/information/add-repo-badge.html) to modify the badge URL to reflect the status of your repository correctly.
-
-**Please note** the badge will not function correctly if your repository is internal or private. In this case, you may remove the badge from your README.
-
-### Manage Outside Collaborators
-
-To add an Outside Collaborator to the repository, follow the guidelines detailed [here](https://github.com/ministryofjustice/github-collaborators).
-
-### Update CODEOWNERS
-
-(Optional) Modify the CODEOWNERS file to specify the teams or users authorized to approve pull requests.
-
+[TODO - these tasks need to be addressed]
 ### Configure Dependabot
 
 Adapt the dependabot.yml file to match your project's [dependency manager](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#package-ecosystem) and to enable [automated pull requests for package updates](https://docs.github.com/en/code-security/supply-chain-security).
