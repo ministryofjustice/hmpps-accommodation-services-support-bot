@@ -1,9 +1,9 @@
 name: Support Rotation Schedule
 
 on:
-  #schedule:
-    # Run at 8:30 AM every day
-    #- cron: '30 8 * * *'
+  schedule:
+     # Run at 8:30 AM every day
+    - cron: '30 8 * * *'
   workflow_dispatch:
     # Allow manual triggering
     inputs:
@@ -41,10 +41,11 @@ jobs:
           SLACK_USERGROUP_ID: ${{ secrets.SLACK_USERGROUP_ID }}
           DAYS_PER_ROTATION: ${{ secrets.DAYS_PER_ROTATION || '2' }}
           ENGINEERS_PER_SHIFT: ${{ secrets.ENGINEERS_PER_SHIFT || '2' }}
+          SLACK_ENABLED: ${{ secrets.SLACK_ENABLED || 'false' }}
         run: node src/index.js
 
       - name: Commit updated rotation data
-        if: success()
+        if: success() && github.server_url == 'https://github.com'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"

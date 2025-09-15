@@ -52,10 +52,11 @@ jobs:
           SLACK_USERGROUP_ID: ${{ secrets.SLACK_USERGROUP_ID }}
           DAYS_PER_ROTATION: ${{ secrets.DAYS_PER_ROTATION || '2' }}
           ENGINEERS_PER_SHIFT: ${{ secrets.ENGINEERS_PER_SHIFT || '2' }}
+          SLACK_ENABLED: ${{ secrets.SLACK_ENABLED || 'false' }}
         run: node src/manageAvailability.js
 
       - name: Commit updated rotation data
-        if: success()
+        if: success() && github.server_url == 'https://github.com'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"

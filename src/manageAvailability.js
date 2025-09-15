@@ -14,14 +14,15 @@ const CONFIG = {
   channelId: process.env.SLACK_CHANNEL_ID || 'cas-dev', // The channel to post to
   userGroupId: process.env.SLACK_USERGROUP_ID || 'cas-engineers', // The user group to pull engineers from
   daysPerRotation: parseInt(process.env.DAYS_PER_ROTATION || '2', 10), // Number of days each rotation lasts
-  engineersPerShift: parseInt(process.env.ENGINEERS_PER_SHIFT || '2', 10) // Number of engineers on support at once
+  engineersPerShift: parseInt(process.env.ENGINEERS_PER_SHIFT || '2', 10), // Number of engineers on support at once
+  slackEnabled: process.env.SLACK_ENABLED !== 'false' // Whether to post to Slack (default: false)
 };
 
 async function main() {
   try {
     // Check if we have the necessary configuration
-    if (!CONFIG.slackToken) {
-      throw new Error('SLACK_TOKEN is required');
+    if (CONFIG.slackEnabled && !CONFIG.slackToken) {
+      throw new Error('SLACK_TOKEN is required when Slack is enabled');
     }
 
     // Get inputs from environment variables
@@ -112,11 +113,19 @@ async function checkAndReassignIfNeeded(originalData, updatedData, userId) {
     NonWorkingDaysModule.isNonWorkingDay(updatedData, userId, tomorrow)) {
     console.log(`User ${userId} is currently on support but now has a non-working day. Reassigning...`);
 
-    // Get all members of the engineering group
-    const engineers = await getUserGroupMembers(CONFIG.slackToken, CONFIG.userGroupId);
+    let engineers = [];
+    let userStatuses = {};
 
-    // Get user statuses to check for out-of-office or illness
-    const userStatuses = await getUserStatuses(CONFIG.slackToken, engineers);
+    if (CONFIG.slackEnabled) {
+      // Get all members of the engineering group
+      engineers = await getUserGroupMembers(CONFIG.slackToken, CONFIG.userGroupId);
+      // Get user statuses to check for out-of-office or illness
+      userStatuses = await getUserStatuses(CONFIG.slackToken, engineers);
+    } else {
+      console.log('Slack is disabled. Using engineers from rotation data.');
+      // Use engineers from rotation data when Slack is disabled
+      engineers = updatedData.rotationOrder.length > 0 ? updatedData.rotationOrder : ['U123456', 'U234567', 'U345678', 'U456789'];
+    }
 
     // Filter out engineers who are out of office or ill
     const statusFilteredEngineers = engineers.filter(engineerId => {
@@ -157,13 +166,18 @@ async function checkAndReassignIfNeeded(originalData, updatedData, userId) {
     );
 
     const newEngineers = getNextEngineers(updatedData, availableEngineers, CONFIG.engineersPerShift);
-    await postSupportAssignment(
-      CONFIG.slackToken,
-      CONFIG.channelId,
-      newEngineers,
-      'Reassigning support due to non-working days update.',
-      CONFIG.daysPerRotation
-    );
+    // Post to Slack or log to console
+    if (CONFIG.slackEnabled) {
+      await postSupportAssignment(
+          CONFIG.slackToken,
+          CONFIG.channelId,
+          newEngineers,
+          'Reassigning support due to non-working days update.',
+          CONFIG.daysPerRotation
+      );
+    } else {
+      logSupportAssignment(newEngineers, 'Reassigning support due to non-working days update.', CONFIG.daysPerRotation);
+    }
 
     // Update rotation data
     const finalData = updateRotation(updatedData, newEngineers);
@@ -174,6 +188,33 @@ async function checkAndReassignIfNeeded(originalData, updatedData, userId) {
 
     console.log(`Support reassigned to: ${newEngineers.join(', ')}`);
   }
+}
+
+/**
+ * Log support assignment to console when Slack is disabled
+ * @param {string[]} engineers - Array of engineer user IDs
+ * @param {string} customMessage - Optional custom message
+ * @param {number} daysPerRotation - Number of days per rotation
+ */
+function logSupportAssignment(engineers, customMessage = null, daysPerRotation = 2) {
+  // Format the engineers as user mentions (or just IDs when Slack is disabled)
+  const engineerMentions = engineers.map(id => `<@${id}>`).join(' and ');
+
+  // Create the message
+  const message = customMessage || `:sunny: Good morning team! :sunny:`;
+  const supportMessage = `${engineerMentions} are on application support for the next ${daysPerRotation} working days. During this time please keep an eye on the #cas-events channel and monitor any alerts that appear there.\n\nIf you are unable to immediately put in a fix for the alert, please document it in some way - either by creating a ticket in JIRA and/or commenting on the alert.\n
+  \n<https://dsdmoj.atlassian.net/wiki/spaces/AP/pages/5006426252/CAS+Technical+Support|See support documentation for guidance>.\n
+  \nTo add in your non-working days, <https://github.com/ministryofjustice/hmpps-community-accommodation-services-support-bot/actions/workflows/manage-non-working-days.yml|please use the action on the support bot here>.`;
+
+  console.log('\n' + '='.repeat(80));
+  console.log('SUPPORT ASSIGNMENT (Slack Disabled)');
+  console.log('='.repeat(80));
+  console.log(`${message}\n`);
+  console.log(`:sunflower: *Support Assignment* :sunflower:`);
+  console.log(supportMessage);
+  console.log('='.repeat(80));
+  console.log('\n📋 COPY THE ABOVE MESSAGE TO YOUR SLACK CHANNEL MANUALLY');
+  console.log('='.repeat(80) + '\n');
 }
 
 // Run the main function

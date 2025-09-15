@@ -1,123 +1,24 @@
 {
   "rotationOrder": [
-    "U07UT6JR6E7",
-    "U06F8H609GT",
-    "UTURD5DSA",
-    "U072M22CGRK",
-    "U07J2S05CJ3",
-    "U0813PKEXN2",
-    "U07N6NZTL1G",
+    "U08S29Z4FNZ",
+    "U0848UCLWU9",
     "U06EQC7PW73",
     "U06T33YJ53J",
-    "U067C4YGUUF",
-    "U0848UCLWU9"
-  ],
-  "currentEngineers": [
+    "U06HLPVDCSW",
+    "U07N6NZTL1G",
     "U06F8H609GT",
-    "U072M22CGRK",
+    "U08QJDY676D",
+    "U08FG2QUF0Q",
+    "U08NFCLQL68",
+    "U07J2SL3SUX",
+    "U0913777XNZ",
     "U07J2S05CJ3"
   ],
+  "currentEngineers": [],
   "skipList": [],
   "history": [
-    {
-      "date": "2025-03-11T12:02:58.381Z",
-      "engineers": [
-        "U06T33YJ53J",
-        "U072M22CGRK"
-      ]
-    },
-    {
-      "date": "2025-03-24T08:38:00.976Z",
-      "engineers": [
-        "U06F8H609GT",
-        "U072M22CGRK",
-        "U07J2S05CJ3"
-      ]
-    },
-    {
-      "date": "2025-03-26T09:09:13.262Z",
-      "engineers": [
-        "U07N6NZTL1G",
-        "U06EQC7PW73",
-        "U06T33YJ53J"
-      ]
-    },
-    {
-      "date": "2025-03-28T08:37:06.860Z",
-      "engineers": []
-    },
-    {
-      "date": "2025-03-31T08:38:12.016Z",
-      "engineers": [
-        "U06F8H609GT",
-        "U072M22CGRK",
-        "U07J2S05CJ3"
-      ]
-    },
-    {
-      "date": "2025-04-02T08:38:09.190Z",
-      "engineers": [
-        "U07N6NZTL1G",
-        "U06EQC7PW73",
-        "U06T33YJ53J"
-      ]
-    },
-    {
-      "date": "2025-04-04T08:37:22.986Z",
-      "engineers": []
-    },
-    {
-      "date": "2025-04-07T08:38:09.935Z",
-      "engineers": [
-        "U06F8H609GT",
-        "U072M22CGRK",
-        "U07J2S05CJ3"
-      ]
-    }
   ],
   "lastRotationDate": "2025-04-07T08:38:09.935Z",
   "nonWorkingDays": {
-    "U072M22CGRK": {
-      "specificDates": [],
-      "recurringDays": [
-        "friday"
-      ]
-    },
-    "U06HLPVDCSW": {
-      "specificDates": [
-        "2025-03-24",
-        "2025-03-25",
-        "2025-03-26",
-        "2025-03-27",
-        "2025-03-28"
-      ],
-      "recurringDays": [
-        "friday"
-      ]
-    },
-    "U067C4YGUUF": {
-      "specificDates": [],
-      "recurringDays": [
-        "friday"
-      ]
-    },
-    "U07J2SL3SUX": {
-      "specificDates": [
-        "2025-03-26",
-        "2025-03-27",
-        "2025-03-28",
-        "2025-03-31",
-        "2025-04-01",
-        "2025-04-02",
-        "2025-04-03",
-        "2025-04-04",
-        "2025-04-07",
-        "2025-04-08",
-        "2025-04-09",
-        "2025-04-10",
-        "2025-04-11"
-      ],
-      "recurringDays": []
-    }
   }
 }
