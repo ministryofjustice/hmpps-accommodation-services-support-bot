@@ -1,9 +1,9 @@
 name: Support Rotation Schedule
 
 on:
-  schedule:
+  #schedule:
     # Run at 8:30 AM every day
-    - cron: '30 8 * * *'
+    #- cron: '30 8 * * *'
   workflow_dispatch:
     # Allow manual triggering
     inputs:
