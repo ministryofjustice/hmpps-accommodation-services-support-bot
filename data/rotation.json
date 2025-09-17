@@ -1,22 +1,22 @@
 {
   "rotationOrder": [
-    "U08S29Z4FNZ",
+    "U06F8H609GT",
+    "U0913777XNZ",
+    "U07J2SL3SUX",
+    "U06T33YJ53J",
     "U0848UCLWU9",
     "U06EQC7PW73",
-    "U06T33YJ53J",
-    "U06HLPVDCSW",
-    "U07N6NZTL1G",
-    "U06F8H609GT",
-    "U08QJDY676D",
     "U08FG2QUF0Q",
+    "U07J2S05CJ3",
     "U08NFCLQL68",
-    "U07J2SL3SUX",
-    "U0913777XNZ",
-    "U07J2S05CJ3"
+    "U08S29Z4FNZ",
+    "U08QJDY676D",
+    "U07N6NZTL1G",
+    "U06HLPVDCSW"
   ],
   "currentEngineers": [
-    "U08S29Z4FNZ",
-    "U0848UCLWU9"
+    "U06EQC7PW73",
+    "U06T33YJ53J"
   ],
   "skipList": [],
   "history": [
@@ -26,8 +26,15 @@
         "U08S29Z4FNZ",
         "U0848UCLWU9"
       ]
+    },
+    {
+      "date": "2025-09-17T07:39:38.114Z",
+      "engineers": [
+        "U06EQC7PW73",
+        "U06T33YJ53J"
+      ]
     }
   ],
-  "lastRotationDate": "2025-09-16T12:30:05.933Z",
+  "lastRotationDate": "2025-09-17T07:39:38.114Z",
   "nonWorkingDays": {}
 }
