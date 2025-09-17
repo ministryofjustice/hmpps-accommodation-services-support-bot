@@ -57,7 +57,10 @@
       "recurringDays": []
     },
     "U06HLPVDCSW": {
-      "specificDates": [],
+      "specificDates": [
+        "2025-09-18",
+        "2025-09-22"
+      ],
       "recurringDays": [
         "friday"
       ]
