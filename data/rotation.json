@@ -14,19 +14,9 @@
     "U06EQC7PW73",
     "U06HLPVDCSW"
   ],
-  "currentEngineers": [
-    "U07N6NZTL1G",
-    "U08FG2QUF0Q"
-  ],
+  "currentEngineers": [],
   "skipList": [],
   "history": [
-    {
-      "date": "2025-11-12T08:42:25.193Z",
-      "engineers": [
-        "U08NFCLQL68",
-        "U0913777XNZ"
-      ]
-    },
     {
       "date": "2025-11-17T08:43:12.107Z",
       "engineers": [
@@ -187,9 +177,13 @@
         "U07N6NZTL1G",
         "U08FG2QUF0Q"
       ]
+    },
+    {
+      "date": "2026-02-27T08:48:12.985Z",
+      "engineers": []
     }
   ],
-  "lastRotationDate": "2026-02-24T08:49:00.862Z",
+  "lastRotationDate": "2026-02-27T08:48:12.985Z",
   "nonWorkingDays": {
     "U0913777XNZ": {
       "specificDates": [
